@@ -1,21 +1,11 @@
 package com.sankuai.malldelivery.pget.util;
 
-import com.sankuai.malldelivery.pget.bizdata.IBizData;
-import com.sankuai.malldelivery.pget.provider.annotation.MtthriftBizDataProvider;
-
 /**
  * Created by daiyongzhi on 2019/12/4.
  */
 public class ParamCheckUtil {
 
-    public static void check(Class<? extends IBizData> bizDataClass, Object... args){
-        MtthriftBizDataProvider bizDataProvider = bizDataClass.getAnnotation(MtthriftBizDataProvider.class);
-        if(bizDataProvider == null){
-            throw new RuntimeException(bizDataClass.getSimpleName()+"没有配置BizDataProvider注解!");
-        }
-
-        Class[] paramTypes = bizDataProvider.paramTypeList();
-
+    public static void check(Class[] paramTypes, Object... args){
         if(paramTypes == null || paramTypes.length < 1){
             if(args == null || args.length < 1){
                 return;

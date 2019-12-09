@@ -5,10 +5,17 @@ import com.google.common.collect.TreeBasedTable;
 import com.meituan.mtrace.Tracer;
 import com.meituan.service.mobile.mtthrift.proxy.ThriftClientProxy;
 import com.sankuai.malldelivery.pget.bizdata.IBizData;
+import com.sankuai.malldelivery.pget.provider.CustomProviderInvoker;
+import com.sankuai.malldelivery.pget.provider.IProviderInvoker;
 import com.sankuai.malldelivery.pget.provider.MtthrfitProviderInvoker;
-import com.sankuai.malldelivery.pget.provider.annotation.MtthriftBizDataProvider;
+import com.sankuai.malldelivery.pget.provider.annotation.CustomProvider;
+import com.sankuai.malldelivery.pget.provider.annotation.MtthriftProvider;
 import org.reflections.Reflections;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +25,7 @@ import java.util.Set;
  * Created by daiyongzhi on 2019/12/4.
  * 初始化类。需要在spring容器启动前完成初始化工作
  */
-public class BizDataManager {
+public class BizDataManager implements BeanPostProcessor {
 
     private String bizDataPackage;
 
@@ -30,7 +37,7 @@ public class BizDataManager {
 
     public static BizDataFetcherExecutor bizDataFetcherExecutor;
     private Table<String, String, ThriftClientProxy> proxyTable = TreeBasedTable.create();
-    private static Map<Class<? extends IBizData>,MtthrfitProviderInvoker>  providerInvokerMap = new HashMap<>();
+    private static Map<Class<? extends IBizData>,IProviderInvoker>  providerInvokerMap = new HashMap<>();
     public static BizDataManager instance;
 
     public void init()throws Exception {
@@ -40,7 +47,7 @@ public class BizDataManager {
         Set<Class<? extends IBizData>> bizDataClasses = reflections.getSubTypesOf(IBizData.class);
         if(bizDataClasses != null && bizDataClasses.size() > 0){
             for(Class<? extends IBizData> bizDataClass : bizDataClasses){
-                MtthriftBizDataProvider bizDataProvider = bizDataClass.getAnnotation(MtthriftBizDataProvider.class);
+                MtthriftProvider bizDataProvider = bizDataClass.getAnnotation(MtthriftProvider.class);
                 if(!bizDataClass.isInterface() && bizDataProvider != null){
                     String remoteAppKey = bizDataProvider.remoteAppKey();
                     String serviceName = bizDataProvider.serviceClass().getName();
@@ -66,8 +73,8 @@ public class BizDataManager {
         instance = this;
     }
 
-    public static MtthrfitProviderInvoker getProviderByBizDataClass(Class<? extends IBizData> bizDataClass) {
-        MtthrfitProviderInvoker providerInvoker = providerInvokerMap.get(bizDataClass);
+    public static IProviderInvoker getProviderByBizDataClass(Class<? extends IBizData> bizDataClass) {
+        IProviderInvoker providerInvoker = providerInvokerMap.get(bizDataClass);
         if(providerInvoker == null){
             throw new RuntimeException("未找到"+bizDataClass.getSimpleName()+"对应的provider");
         }
@@ -83,9 +90,9 @@ public class BizDataManager {
             }catch (InterruptedException e){
                 throw e;
             }finally {
-                Collection<MtthrfitProviderInvoker> providerInvokers = providerInvokerMap.values();
+                Collection<IProviderInvoker> providerInvokers = providerInvokerMap.values();
                 if(providerInvokers != null && providerInvokers.size() > 0){
-                    for(MtthrfitProviderInvoker providerInvoker : providerInvokers){
+                    for(IProviderInvoker providerInvoker : providerInvokers){
                         providerInvoker.destroy();
                     }
                 }
@@ -93,6 +100,31 @@ public class BizDataManager {
         }
 
     }
+
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        CustomProvider providerAnnotation = bean.getClass().getAnnotation(CustomProvider.class);
+        if(providerAnnotation != null){
+            Method[] methods = bean.getClass().getDeclaredMethods();
+            for(Method method : methods){
+                Class returnClazz = method.getReturnType();
+                if(IBizData.class.isAssignableFrom(returnClazz)){
+                    ReflectionUtils.makeAccessible(method);
+                    providerInvokerMap.put(returnClazz,new CustomProviderInvoker(bean,method));
+                }
+            }
+        }
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
+    }
+
+
+
 
     public String getBizDataPackage() {
         return bizDataPackage;
@@ -133,6 +165,7 @@ public class BizDataManager {
     public void setQueueSize(Integer queueSize) {
         this.queueSize = queueSize;
     }
+
 
 
 }

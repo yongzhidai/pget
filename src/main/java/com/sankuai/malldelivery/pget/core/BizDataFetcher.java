@@ -4,7 +4,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.sankuai.malldelivery.pget.bizdata.IBizData;
 import com.sankuai.malldelivery.pget.exception.*;
-import com.sankuai.malldelivery.pget.provider.MtthrfitProviderInvoker;
+import com.sankuai.malldelivery.pget.provider.IProviderInvoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ class BizDataFetcher implements Callable<Void> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BizDataFetcher.class);
 
-    private MtthrfitProviderInvoker providerInvoker;
+    private IProviderInvoker providerInvoker;
     private Object[] args;
 
     private volatile boolean success = false;
@@ -29,7 +29,7 @@ class BizDataFetcher implements Callable<Void> {
 
     /* --------------------------------对外使用方法------------------------------ */
 
-    public BizDataFetcher(MtthrfitProviderInvoker providerInvoker, Object... args) {
+    public BizDataFetcher(IProviderInvoker providerInvoker, Object... args) {
         this.providerInvoker = providerInvoker;
         this.args = args;
         if(this.providerInvoker == null){
@@ -43,7 +43,7 @@ class BizDataFetcher implements Callable<Void> {
     public Void call() throws Exception {
         String monitorName = null;
         try {
-            monitorName = getMonitorName();
+            monitorName = providerInvoker.getMonitorName();
         }catch (Exception e){
             monitorName = "Unknown";
         }
@@ -74,11 +74,11 @@ class BizDataFetcher implements Callable<Void> {
             return defaultBizData;
         }
         if(exception != null){//出现异常
-            throw new BizDataFetchFailedException(getMonitorName()+"获取数据时，发生异常. error:",exception);
+            throw new BizDataFetchFailedException(providerInvoker.getMonitorName()+"获取数据时，发生异常. error:",exception);
         }else if(!success){//没有成功 & 没有异常，则是因为没执行完。
-            throw new BizDataFetchTimeOutException(getMonitorName()+"尚未执行完!");
+            throw new BizDataFetchTimeOutException(providerInvoker.getMonitorName()+"尚未执行完!");
         }else {
-            throw new BizDataFetchUnknownException(getMonitorName()+"获取业务数据时，发生未知异常!");
+            throw new BizDataFetchUnknownException(providerInvoker.getMonitorName()+"获取业务数据时，发生未知异常!");
         }
     }
 
@@ -92,13 +92,13 @@ class BizDataFetcher implements Callable<Void> {
         } catch (Exception e) {
             if(defaultBizData != null){
                 StringBuilder log = new StringBuilder();
-                log.append(getMonitorName())
+                log.append(providerInvoker.getMonitorName())
                         .append("调用失败. ")
                         .append("使用默认值：")
                         .append(defaultBizData.format2String())
                         .append(". Cause by:");
                 LOGGER.warn(log.toString(),e);
-                this.exception = new BizDataFetchTolerableException(getMonitorName()+"获取异常(有兜底). error:",e);
+                this.exception = new BizDataFetchTolerableException(providerInvoker.getMonitorName()+"获取异常(有兜底). error:",e);
             }else{
                 this.exception = e;
             }
@@ -128,13 +128,7 @@ class BizDataFetcher implements Callable<Void> {
     }
 
 
-    private String getMonitorName(){
-        StringBuilder sb = new StringBuilder();
-        sb.append(providerInvoker.getBizDataClass().getSimpleName()).append("(")
-                .append(providerInvoker.getServiceName()).append(".").append(providerInvoker.getMethodName())
-                .append(")");
-        return sb.toString();
-    }
+
 
 
 }

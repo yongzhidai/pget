@@ -1,7 +1,6 @@
 package com.sankuai.malldelivery.pget.provider.annotation;
 
 import com.sankuai.malldelivery.pget.parser.IBizDataParser;
-import org.springframework.stereotype.Service;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,12 +9,11 @@ import java.lang.annotation.Target;
 
 /**
  * Created by daiyongzhi on 2019/12/4.
- * 自定义业务数据提供者
+ * 用于指定得到BizData的来源(远程服务的appkey、服务类、方法名、参数和返回值信息等)
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Service
-public @interface CustomBizDataProvider {
+public @interface MtthriftProvider {
     /** 远程服务的appkey */
     String remoteAppKey();
     /** 远程服务的service类 */

@@ -3,7 +3,7 @@ package com.sankuai.malldelivery.pget.core;
 
 import com.sankuai.malldelivery.pget.bizdata.IBizData;
 import com.sankuai.malldelivery.pget.exception.BizDataFetchException;
-import com.sankuai.malldelivery.pget.provider.MtthrfitProviderInvoker;
+import com.sankuai.malldelivery.pget.provider.IProviderInvoker;
 import com.sankuai.malldelivery.pget.util.ParamCheckUtil;
 
 import java.lang.reflect.Field;
@@ -55,11 +55,11 @@ public class BizDataInjector {
         for(Field field : fields){
             Class type = field.getType();
             if(bizDataClass.isAssignableFrom(type)){
-                ParamCheckUtil.check(type,args);
                 field.setAccessible(true);
                 bizDataTypeFieldMap.put(type,field);
 
-                MtthrfitProviderInvoker providerInvoker = BizDataManager.getProviderByBizDataClass(type);
+                IProviderInvoker providerInvoker = BizDataManager.getProviderByBizDataClass(type);
+                providerInvoker.checkParam(args);
                 fetchers.add(new BizDataFetcher(providerInvoker,args));
             }
         }

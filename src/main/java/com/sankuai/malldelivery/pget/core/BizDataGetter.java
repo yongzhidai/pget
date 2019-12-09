@@ -2,8 +2,7 @@ package com.sankuai.malldelivery.pget.core;
 
 import com.sankuai.malldelivery.pget.bizdata.IBizData;
 import com.sankuai.malldelivery.pget.exception.BizDataFetchException;
-import com.sankuai.malldelivery.pget.provider.MtthrfitProviderInvoker;
-import com.sankuai.malldelivery.pget.util.ParamCheckUtil;
+import com.sankuai.malldelivery.pget.provider.IProviderInvoker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,8 @@ public class BizDataGetter {
         if(bizDataClass.isInterface()){
             throw new RuntimeException("通过Getter获取BizData,类型必须是具体的BizData实现类!");
         }
-        ParamCheckUtil.check(bizDataClass,args);
-        MtthrfitProviderInvoker providerInvoker = BizDataManager.getProviderByBizDataClass(bizDataClass);
+        IProviderInvoker providerInvoker = BizDataManager.getProviderByBizDataClass(bizDataClass);
+        providerInvoker.checkParam(args);
         fetcherList.add(new BizDataFetcher(providerInvoker,args));
         return this;
     }
