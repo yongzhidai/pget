@@ -109,7 +109,7 @@ public class BizDataManager implements BeanPostProcessor {
             Method[] methods = bean.getClass().getDeclaredMethods();
             for(Method method : methods){
                 Class returnClazz = method.getReturnType();
-                if(IBizData.class.isAssignableFrom(returnClazz)){
+                if(IBizData.class.isAssignableFrom(returnClazz) && !returnClazz.isInterface()){
                     ReflectionUtils.makeAccessible(method);
                     providerInvokerMap.put(returnClazz,new CustomProviderInvoker(bean,method));
                 }

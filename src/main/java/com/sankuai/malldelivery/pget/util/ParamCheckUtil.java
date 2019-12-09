@@ -20,7 +20,11 @@ public class ParamCheckUtil {
                 throw new RuntimeException("实际传参与BizData配置的参数数量不一致");
             }
             for(int i=0;i<paramTypes.length;i++){
-                if(!paramTypes[i].isAssignableFrom(args[i].getClass())){
+                Class type = paramTypes[i];
+                if(type.isPrimitive()){
+                    type = ClassUtil.convert2PackageType(type);
+                }
+                if(!type.isAssignableFrom(args[i].getClass())){
                     throw new RuntimeException("实际传参与BizData配置的参数类型不一致");
                 }
             }
