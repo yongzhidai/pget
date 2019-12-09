@@ -1,0 +1,10 @@
+#IDEA
+**/.idea/
+**/*.iml
+
+#Compile folder
+**/target/
+
+#log output
+**/logs/
+
