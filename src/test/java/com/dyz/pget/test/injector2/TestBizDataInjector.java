@@ -3,8 +3,7 @@ package com.dyz.pget.test.injector2;
 import com.dyz.pget.core.BizDataInjector;
 import com.dyz.pget.exception.BizDataFetchException;
 import com.dyz.pget.test.TestBase;
-import com.dyz.pget.test.bizdata.ISchoolBizData;
-import com.dyz.pget.test.bizdata.UserInfoBizData;
+import com.dyz.pget.test.bizdata.*;
 import org.junit.Test;
 
 /**
@@ -19,6 +18,16 @@ public class TestBizDataInjector extends TestBase{
         long schoolId = 11L;
         BizDataWrapper bizDataWrapper = new BizDataWrapper();
         //并行获取用户信息、以及三个学校相关的数据。并注入到bizDataWrapper中，以方便使用。超时时间是100毫秒
+
+        //如果不使用分类注入模式
+        /*BizDataInjector.build(bizDataWrapper)
+                .inject(SchoolBaseInfoBizData.class,schoolId)
+                .inject(SchoolLocationBizData.class,schoolId)
+                .inject(SchoolTeachersBizData.class,schoolId)
+                .inject(UserInfoBizData.class,userId)
+                .doInject(100L);*/
+
+        //使用分类注入模式
         BizDataInjector.build(bizDataWrapper)
                 .inject(ISchoolBizData.class,schoolId)
                 .inject(UserInfoBizData.class,userId)
