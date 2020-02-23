@@ -22,6 +22,7 @@ public class TestBizDataGetter extends TestBase{
         long userId = 1345L;
         long shopId = 11L;
         long productId = 11011L;
+        //并行获取用户信息、商品信息、门店信息三个数据。超时时间是100毫秒
         List<IBizData> bizDataList = BizDataGetter.build()
                 .get(UserInfoBizData.class,userId)
                 .get(ProductInfoBizData.class,shopId,productId)

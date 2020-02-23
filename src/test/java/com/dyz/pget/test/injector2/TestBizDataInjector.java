@@ -1,10 +1,9 @@
-package com.dyz.pget.test.injector;
+package com.dyz.pget.test.injector2;
 
 import com.dyz.pget.core.BizDataInjector;
 import com.dyz.pget.exception.BizDataFetchException;
 import com.dyz.pget.test.TestBase;
-import com.dyz.pget.test.bizdata.ProductInfoBizData;
-import com.dyz.pget.test.bizdata.ShopInfoBizData;
+import com.dyz.pget.test.bizdata.ISchoolBizData;
 import com.dyz.pget.test.bizdata.UserInfoBizData;
 import org.junit.Test;
 
@@ -17,21 +16,20 @@ public class TestBizDataInjector extends TestBase{
     @Test
     public void testGetter() throws BizDataFetchException {
         long userId = 1345L;
-        long shopId = 11L;
-        long productId = 11011L;
+        long schoolId = 11L;
         BizDataWrapper bizDataWrapper = new BizDataWrapper();
-        //并行获取用户信息、商品信息、门店信息三个数据。并注入到bizDataWrapper中，以方便使用。超时时间是100毫秒
+        //并行获取用户信息、以及三个学校相关的数据。并注入到bizDataWrapper中，以方便使用。超时时间是100毫秒
         BizDataInjector.build(bizDataWrapper)
+                .inject(ISchoolBizData.class,schoolId)
                 .inject(UserInfoBizData.class,userId)
-                .inject(ProductInfoBizData.class,shopId,productId)
-                .inject(ShopInfoBizData.class,shopId)
                 .doInject(100L);
 
 
 
         System.out.println(bizDataWrapper.getUserInfoBizData().format2String());
-        System.out.println(bizDataWrapper.getProductInfoBizData().format2String());
-        System.out.println(bizDataWrapper.getShopInfoBizData().format2String());
+        System.out.println(bizDataWrapper.getSchoolBaseInfoBizData().format2String());
+        System.out.println(bizDataWrapper.getSchoolLocationBizData().format2String());
+        System.out.println(bizDataWrapper.getSchoolTeachersBizData().format2String());
     }
 
 }
