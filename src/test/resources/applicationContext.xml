@@ -9,11 +9,11 @@
         http://www.springframework.org/schema/context/spring-context.xsd">
 
 
-    <!-- 扫描本项目组件（除了Controller） -->
+    <!-- 扫描本项目组件（路径一定要包含BizDataProivder类） -->
     <context:component-scan base-package="com.dyz.pget.test" />
 
 
-
+    <!-- 初始化框架，并设置用于并行获取业务数据的线程池配置  -->
     <bean class="com.dyz.pget.core.BizDataManager" init-method="init" destroy-method="destroy">
         <property name="corePoolSize" value="12"/>
         <property name="maximumPoolSize" value="200"/>
