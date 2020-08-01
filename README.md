@@ -10,3 +10,7 @@
 ### 扩展模式
 分类注入模式<br/>
 参看代码例子：[分类Injector案例](https://github.com/yongzhidai/pget/tree/master/src/test/java/com/dyz/pget/test/injector2)<br/>
+
+###pget Idea插件
+可以根据当前的BizData提示对应的需要的方法入参。避免参数写错的情况。<br/>
+[链接](https://github.com/yongzhidai/pget-idea-plugin)
